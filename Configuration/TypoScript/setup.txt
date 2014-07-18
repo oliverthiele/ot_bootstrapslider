@@ -1,0 +1,173 @@
+/**
+ * TypoScript Setup for the Bootstrap Slider
+ *
+ * Bootstrap exclusively uses CSS3 for its animations, but Internet Explorer 8 & 9 don't support the necessary CSS properties.
+ *
+ * @author Oliver Thiele <mailYYYY@oliver-thiele.de>
+ * @version 2.0.0
+ * @see http://getbootstrap.com/javascript/#carousel
+ */
+
+tt_content.ot_bootstrapslider_pi1 >
+tt_content.ot_bootstrapslider_pi1 = COA
+tt_content.ot_bootstrapslider_pi1 {
+	stdWrap.dataWrap = <div id="bootstrapCarousel{field:uid}" class="carousel slide">|</div><!-- bootstrapCarousel end -->
+
+	// Indicators
+	1 = LOAD_REGISTER
+	1.counterItemSlider = 0
+
+	2 = LOAD_REGISTER
+	2.firstItemSliderClass = active
+
+	10 = FILES
+	10 {
+		references {
+			table = tt_content
+			uid.data = field:uid
+			fieldName = image
+		}
+		stdWrap.wrap = <ol class="carousel-indicators">|</ol>
+
+		renderObj = COA
+		renderObj {
+			10 = TEXT
+			10 {
+				value = <li data-target="#bootstrapCarousel{field:uid}" data-slide-to="{register:counterItemSlider}"
+				insertData = 1
+			}
+			12 = TEXT
+			12 {
+				data = register:firstItemSliderClass
+				required = 1
+				noTrimWrap = | class="|" |
+			}
+
+			15 = TEXT
+			15.value = ></li>
+
+			# Das Register mit der CSS-Klasse active löschen
+			20 = RESTORE_REGISTER
+
+			# Zähler um 1 erhöhen
+			25  = LOAD_REGISTER
+			25 {
+				tempN {
+					data = register:counterItemSlider
+					wrap = |+1
+				}
+				counterItemSlider.data = register:tempN
+				counterItemSlider.prioriCalc = 1
+			}
+
+
+			# Register um einen Eintrag erhöhen, der in der Schleife wieder gelöscht wird (Object 20)
+			30  = LOAD_REGISTER
+			30 {
+				temp = 1
+			}
+			40 = TEXT
+			40.stdWrap.char = 10
+		}
+	}
+	11 = TEXT
+	11.stdWrap.char = 10
+
+	// Items
+	15 = LOAD_REGISTER
+	15.firstItemSliderClass = active
+
+	# Carousel items
+	20 = FILES
+	20 {
+		stdWrap {
+			wrap = <div class="carousel-inner">|</div><!-- carousel inner end-->
+		}
+		references {
+			table = tt_content
+			uid.data = field:uid
+			fieldName = image
+		}
+		renderObj = COA
+		renderObj {
+			10 = TEXT
+			10 {
+				value =  <div class="item {register:firstItemSliderClass}">
+				insertData = 1
+			}
+			20 = COA
+			20 {
+				stdWrap.typolink {
+					parameter.data = file:current:link
+				}
+				10 = IMAGE
+				10 {
+					file {
+						import.data = file:current:originalUid // file:current:uid
+						width = 1170
+					}
+				}
+
+				// Caption
+				20 = COA
+				20 {
+					stdWrap {
+						required = 1
+						wrap = <div class="carousel-caption">|</div><!-- caption end -->
+					}
+
+					10 = TEXT
+					10 {
+						stdWrap {
+							data = file:current:title
+							required = 1
+							htmlSpecialChars = 1
+							wrap = <h4>|</h4>
+						}
+					}
+
+					20 = TEXT
+					20 {
+						stdWrap {
+							data = file:current:description
+							required = 1
+							parseFunc =< lib.parseFunc_RTE
+							wrap = <p>|</p>
+						}
+					}
+				}
+			}
+
+			30 = RESTORE_REGISTER
+
+			40 = TEXT
+			40.value = </div>
+
+			50 = TEXT
+			50.stdWrap.char = 10
+		}
+	}
+
+	// Control
+	30 = TEXT
+	30 {
+		value (
+	<a class="left carousel-control" href="#bootstrapCarousel{field:uid}" data-slide="prev">
+		<span class="glyphicon glyphicon-chevron-left"></span>
+	</a>
+	<a class="right carousel-control" href="#bootstrapCarousel{field:uid}" data-slide="next">
+		<span class="glyphicon glyphicon-chevron-right"></span>
+	</a>
+		)
+		stdWrap.insertData = 1
+	}
+	40 = TEXT
+	40.stdWrap.char = 10
+}
+plugin.ot_bootstrapslider_pi1 {
+	_CSS_DEFAULT_STYLE (
+		.carousel .item a:hover {text-decoration: none;}
+		.carousel .item a:hover h4,
+		.carousel .item a:hover p {color:#aaa;}
+)
+}
